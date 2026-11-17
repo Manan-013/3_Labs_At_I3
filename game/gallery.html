@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Robot Gallery</title>
+<style>body{margin:0;background:#000}canvas{display:block;width:100vw}</style></head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script src="js/art.js"></script>
+<script>
+// Dev page: ?who=rust|np|echo|deadlock|kz|all  &lit=0.6
+const q = new URLSearchParams(location.search);
+const who = q.get("who") || "all", lit = Number(q.get("lit") ?? 0.6);
+const c = document.getElementById("c"), ctx = c.getContext("2d");
+const bg = new Image(); bg.src = "assets/img/doorway_lit.jpg";
+function frame(ms) {
+  const t = ms / 1000;
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 1280, 720);
+  if (bg.complete) { ctx.globalAlpha = 0.5; ctx.drawImage(bg, 0, 0, 1280, 720); ctx.globalAlpha = 1; }
+  if (who === "all") {
+    [["rust", 160, 0.95], ["np", 400, 0.95], ["echo", 640, 1.1], ["deadlock", 890, 0.8], ["kz", 1130, 1.1]]
+      .forEach(([w, x, s]) => Art.drawRobot(ctx, w, x, 700, s, { lit, t, grin: 1, power: 0.8 }));
+  } else if (who === "jump") {
+    Art.jumpscare(ctx, q.get("j") || "rust", t, 1);
+  } else Art.drawRobot(ctx, who, 640, 715, Number(q.get("s") || 1.15), { lit, t, grin: 1, power: 0.8, pose: q.get("pose") || "stand" });
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body></html>

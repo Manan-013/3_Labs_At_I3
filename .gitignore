@@ -1,0 +1,15 @@
+# Font whose license forbids redistribution (the game uses Creepster, OFL)
+fonts/who_asks_satan.ttf
+extracted_font/
+
+# Raw phone photos (contain people) and the original upload
+images/lab_raw/
+*.zip
+
+# Local / scratch
+.claude/
+test_render.pdf
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

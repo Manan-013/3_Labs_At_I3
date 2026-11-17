@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five Nights at I-3</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="view" width="1280" height="720"></canvas>
+
+  <!-- ===== HUD (always on during a night) ===== -->
+  <div id="hud" class="hidden">
+    <div id="hud-time"><span id="clock">12 AM</span><small id="night-label">NIGHT 1</small></div>
+    <div id="hud-power">
+      <div>POWER <b id="power-val">100%</b></div>
+      <div>USAGE <span id="usage-bars"></span></div>
+    </div>
+    <div id="hud-watchdog"><span>WATCHDOG</span><div class="bar"><i id="wd-fill"></i></div></div>
+  </div>
+
+  <!-- ===== Office controls ===== -->
+  <div id="office-ui" class="hidden">
+    <div class="door-panel left">
+      <button id="btn-door-l" class="dbtn door">GATE<kbd>Q</kbd></button>
+      <button id="btn-light-l" class="dbtn light">LIGHT<kbd>A</kbd></button>
+    </div>
+    <div class="door-panel right">
+      <button id="btn-door-r" class="dbtn door">GATE<kbd>E</kbd></button>
+      <button id="btn-light-r" class="dbtn light">LIGHT<kbd>D</kbd></button>
+    </div>
+  </div>
+
+  <!-- bottom bar: monitor toggles -->
+  <div id="bottom-bar" class="hidden">
+    <button id="btn-cams" class="bar-btn">&#9650; CAMERAS <kbd>S</kbd></button>
+    <button id="btn-term" class="bar-btn term">&#9650; TERMINAL <kbd>T</kbd></button>
+  </div>
+
+  <!-- ===== Camera UI ===== -->
+  <div id="cam-ui" class="hidden">
+    <div id="cam-label"></div>
+    <div id="cam-rec"><i></i> REC</div>
+    <button id="btn-strobe" class="hidden">STROBE CABINET <kbd>F</kbd></button>
+    <div id="cam-map">
+      <div class="map-title">LAB I-3 // CCTV</div>
+      <div id="map-grid"></div>
+    </div>
+  </div>
+
+  <!-- ===== Terminal / IDE ===== -->
+  <div id="term" class="hidden">
+    <div class="term-head">
+      <span id="term-user">sentinel@lab-i3:~/cluster$</span>
+      <span id="term-status"></span>
+    </div>
+    <div class="term-body">
+      <div class="term-task">
+        <div id="task-meta"></div>
+        <div id="task-prompt"></div>
+        <pre id="task-code"></pre>
+        <div id="task-choices"></div>
+        <div id="task-input-row">
+          <span class="prompt-sym">&gt;</span>
+          <input id="task-input" autocomplete="off" spellcheck="false" placeholder="type your fix...">
+        </div>
+        <div class="term-actions">
+          <button id="btn-exec">EXECUTE <kbd>Ctrl+Enter</kbd></button>
+          <button id="btn-skip">SKIP TICKET</button>
+        </div>
+        <div id="term-log"></div>
+      </div>
+      <div class="term-side">
+        <div class="side-box wd">
+          <div class="side-title">KERNEL ZERO // WATCHDOG</div>
+          <div class="bar big"><i id="wd-fill-2"></i></div>
+          <div class="token-row">send: <code id="hb-token"></code></div>
+          <input id="hb-input" autocomplete="off" spellcheck="false" placeholder="type heartbeat + Enter">
+        </div>
+        <div class="side-box purge">
+          <div class="side-title">CABINET SOCKET</div>
+          <div id="purge-state">no interference</div>
+          <div class="token-row">purge: <code id="purge-token"></code></div>
+          <input id="purge-input" autocomplete="off" spellcheck="false" placeholder="type purge cmd + Enter">
+        </div>
+        <div class="side-hint">Correct fix: <b class="g">+5%</b> power<br>Error: <b class="r">-7%</b> power<br><br>While you type, something on the right side moves faster.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tape subtitles ===== -->
+  <div id="tape" class="hidden">
+    <div class="tape-head">&#9679; <span id="tape-label">SENTINEL ORIENTATION LOG</span> <span id="tape-title"></span><button id="btn-tape-skip">STOP TAPE</button></div>
+    <div id="tape-text"></div>
+  </div>
+
+  <!-- ===== Walk-in intro ===== -->
+  <div id="walk-ui" class="hidden">
+    <div id="walk-hint">W A S D to walk &middot; SHIFT to run &middot; A / D to look around</div>
+    <div id="walk-prompt"></div>
+    <button id="btn-walk-skip">SKIP INTRO &#9656;</button>
+  </div>
+
+  <!-- ===== Screens ===== -->
+  <div id="screen-title" class="screen">
+    <div class="title-wrap">
+      <div class="stamp">/// LAB I-3 CONTAINMENT ARCHIVE ///</div>
+      <h1>FIVE NIGHTS<br>AT I-3</h1>
+      <div class="subtitle">your survival depends on your code</div>
+      <div class="menu">
+        <button id="btn-new">NEW GAME</button>
+        <button id="btn-continue">CONTINUE <span id="continue-night"></span></button>
+        <div id="night-select"></div>
+      </div>
+      <div class="howto">
+        <b>HOW TO SURVIVE</b><br>
+        Q / E &nbsp;close left / right gate &nbsp;&middot;&nbsp; A / D &nbsp;door lights<br>
+        S &nbsp;cameras &nbsp;&middot;&nbsp; T &nbsp;code terminal &nbsp;&middot;&nbsp; 1-9 &nbsp;switch camera<br>
+        Everything drains power. Correct code <span class="g">+5%</span>, errors <span class="r">-7%</span>.<br>
+        Keep the watchdog fed. Survive until 6 AM. Headphones recommended.
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-night" class="screen hidden">
+    <div class="big-time">11:00 PM</div>
+    <div id="night-intro-label">NIGHT 1</div>
+  </div>
+
+  <div id="screen-win" class="screen hidden">
+    <div class="big-time win">6:00 AM</div>
+    <div id="win-text"></div>
+    <button id="btn-next">NEXT NIGHT</button>
+    <button id="btn-menu-w">MENU</button>
+  </div>
+
+  <div id="screen-over" class="screen hidden">
+    <div class="panic">KERNEL PANIC</div>
+    <div id="over-text"></div>
+    <pre id="over-stats"></pre>
+    <button id="btn-retry">RETRY NIGHT</button>
+    <button id="btn-menu-o">MENU</button>
+  </div>
+
+  <div id="click-to-start" class="screen hidden"><div>CLICK TO BEGIN SHIFT</div></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/voices.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/art.js"></script>
+<script src="js/puzzles.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
